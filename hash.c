@@ -1,4 +1,5 @@
 #include "hash.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -27,24 +28,20 @@ pHash HashCreate(int arr_size , HashFunc HashF, PrintFunc PrintF, CompareFunc Co
 {
 	if (arr_size <= 0 || HashF == NULL || PrintF == NULL || CompareF == NULL || GetKeyF == NULL || DestroyF == NULL) return NULL;
 	pHash ph;
-	if (ph = (pHash)malloc(sizeof(struct _Hash)) == NULL)
+	if (ph = (pHash)malloc(sizeof(struct _Hash)) == NULL)//use Calloc!!
 	{
 		printf("Error Allocation Memory\n");
 		return NULL;
 	}
-	pNode* hash_table;
-	if (hash_table = (pNode*)malloc(sizeof(pNode) * arr_size) == NULL)
+	pNode* h_table;
+	if (h_table = (pNode*)calloc(sizeof(pNode) * arr_size, sizeof(pNode)) == NULL)
 	{
 		printf("Error Allocation Memory\n");
 		free(ph);
 		return NULL;
 	}
-	for (int i = 0; i < arr_size; i++)
-	{
-		hash_table[i] = NULL;
-	}
 
-	ph->hash_table = hash_table;
+	ph->hash_table = h_table;
 	ph->size_of_arr = arr_size;
 	ph->HashFunc = HashF;
 	ph->PrintFunc = PrintF;
@@ -55,7 +52,7 @@ pHash HashCreate(int arr_size , HashFunc HashF, PrintFunc PrintF, CompareFunc Co
 	return ph;
 }
 
-Result HashAdd(pHash ph, pElement p_elem)
+Result HashAdd(pHash ph, pElement p_elem)//what if word already in???
 {
 	if (ph == NULL || p_elem == NULL) return FAIL;
 	pKey pk = ph->GetKeyFunc(p_elem);
@@ -70,7 +67,9 @@ Result HashAdd(pHash ph, pElement p_elem)
 
 pElement HashFind(pHash ph, pKey pk)
 {
+	if (ph == NULL || pk == NULL)return NULL;
 	int index = ph->HashFunc(pk, ph->size_of_arr);
+	if (index < 0)return NULL;
 	pElement p_elem = GetELementByKey(ph, ph->hash_table[index], pk);
 	return p_elem;
 }
@@ -188,3 +187,5 @@ Result DestroyListAndElements(pHash ph, pNode head_of_list)
 	}
 	return SUCCESS;
 }
+
+bool isKeyExis
