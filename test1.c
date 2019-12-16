@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,8 @@
 
 pHash ReadDictionary () {	
 	/* This function reads a dictionary line by line from the standard input. */
+	/*FILE* = p_file;
+	p_file = fopen("in1-1.txt", "r");*/
 	pHash dictionary;
 	char entryLine [100] = "";
 	char *word, *translation;
@@ -22,6 +25,21 @@ pHash ReadDictionary () {
 }
 
 int main () {
-	// Add your code here...
+	pHash ph = ReadDictionary();
+	PrintDictionary(ph);
+	DeleteTranslation(ph, "dog");
+	DeleteTranslation(ph, "cat");
+	DeleteTranslation(ph, "astronaut");
+	PrintDictionary(ph);
+	AddTranslation(ph, "goat", "ez");
+	AddTranslation(ph, "cow", "para");
+	AddTranslation(ph, "school", "beitsefer");
+	AddTranslation(ph, "boy", "yeled");
+	PrintDictionary(ph);
+	Translate(ph, "flag");
+	Translate(ph, "goat");
+	Translate(ph, "school");
+	Translate(ph, "apple");
+	HashDestroy(ph);
 	return 0;
 }

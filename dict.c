@@ -15,6 +15,7 @@ struct _Element_Word
 //---------------------------------------------hash passed functions------------------------------------------//
 int HashWord(char* word, int size)//are there invalid args?
 {
+	if (size <= 0 || word == NULL)return -1;
 	return ((int)(((word[0] - 'a') * 26 + strlen(word)) % size));
 }
 
@@ -25,11 +26,11 @@ Result PrintEntry(pWord pw)
 	return SUCCESS;
 }
 
-Result CompareWords(char* word1, char* word2)
+CompResult CompareWords(char* word1, char* word2)
 {
-	if (word1 == NULL || word2 == NULL)return FAIL;
-	if (strcmp(word1, word2) == 0) return SUCCESS;
-	return FAIL;
+	if (word1 == NULL || word2 == NULL)return DIFFERENT;
+	if (strcmp(word1, word2) == 0) return SAME;
+	return DIFFERENT;
 }
 
 char* GetEntryKey(pWord pw)
@@ -38,25 +39,45 @@ char* GetEntryKey(pWord pw)
 	return pw->key;
 }
 
-void DestroyEntry(pWord pw)
+Result DestroyEntry(pWord pw)
 {
-	if (pw == NULL) return;
+	if (pw == NULL) return FAIL;
+	free(pw->key);
+	free(pw->translate);
 	free(pw);
+	return SUCCESS;
 }
 //---------------------------------------------struct word function------------------------------------------//
 
 pWord createElementWord(char* word, char* translate)
 {
 	if (word == NULL || translate == NULL) return NULL;
-	pWord pw;
-	if ((pw = (pWord)malloc(sizeof(struct _Element_Word))) == NULL)
+	pWord pw = (pWord)malloc(sizeof(struct _Element_Word));
+	if (pw == NULL)
 	{
 		printf("Error Allocation Memory\n");
 		return NULL;
 	}
-	pw->word = word;
-	pw->translate = translate;
-	pw->key = word;
+	char* word_ = (char*)calloc(sizeof(char) *MAX_LENGTH, sizeof(char));
+	if(word_==NULL)
+	{
+		free(pw);
+		printf("Error Allocation Memory\n");
+		return NULL;
+	}
+	char* translate_ = (char*)calloc(sizeof(char) * MAX_LENGTH, sizeof(char));
+	if (translate_ == NULL)
+	{
+		free(pw);
+		free(word_);
+		printf("Error Allocation Memory\n");
+		return NULL;
+	}
+	strcpy(word_, word);
+	strcpy(translate_, translate);
+	pw->word = word_;
+	pw->translate = translate_;
+	pw->key = word_;
 	return pw;
 }
 
@@ -103,6 +124,7 @@ pHash CreateDictionary()
 
 Result AddTranslation(pHash ph, char* word, char* translation)//can it return a value?
 {
+
 	pWord pw = createElementWord(word, translation);
 	if (pw == NULL)return FAIL;
 	if (HashAdd(ph, pw) == FAIL)return FAIL;

@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
 
-}
 struct _Hash
 {
 	pNode *hash_table;///check
@@ -27,14 +25,14 @@ struct _Node
 pHash HashCreate(int arr_size , HashFunc HashF, PrintFunc PrintF, CompareFunc CompareF, GetKeyFunc GetKeyF, DestroyFunc DestroyF)
 {
 	if (arr_size <= 0 || HashF == NULL || PrintF == NULL || CompareF == NULL || GetKeyF == NULL || DestroyF == NULL) return NULL;
-	pHash ph;
-	if (ph = (pHash)malloc(sizeof(struct _Hash)) == NULL)//use Calloc!!
+	pHash ph = (pHash)malloc(sizeof(struct _Hash));
+	if (ph == NULL)//use Calloc!!
 	{
 		printf("Error Allocation Memory\n");
 		return NULL;
 	}
-	pNode* h_table;
-	if (h_table = (pNode*)calloc(sizeof(pNode) * arr_size, sizeof(pNode)) == NULL)
+	pNode* h_table = (pNode*)calloc(sizeof(pNode) * arr_size, sizeof(pNode));
+	if ( h_table == NULL)
 	{
 		printf("Error Allocation Memory\n");
 		free(ph);
@@ -56,9 +54,10 @@ Result HashAdd(pHash ph, pElement p_elem)//what if word already in???
 {
 	if (ph == NULL || p_elem == NULL) return FAIL;
 	pKey pk = ph->GetKeyFunc(p_elem);
+	if (isKeyExist(ph, pk))return FAIL;
 	int index = ph->HashFunc(pk, ph->size_of_arr);
-	pNode pn;
-	if ((pn = CreateNode(p_elem)) == NULL)return FAIL;
+	pNode pn = CreateNode(p_elem);
+	if (pn  == NULL)return FAIL;
 	pNode head_of_list = ph->hash_table[index];
 	ph->hash_table[index] = pn;
 	pn->next_node = head_of_list;
@@ -78,20 +77,23 @@ Result HashRemove(pHash ph, pKey pk)
 {
 	if (ph == NULL || pk == NULL)return FAIL;
 	int index = ph->HashFunc(pk, ph->size_of_arr);//what if index < 0
+	if (index < 0)return FAIL;
 	pNode pn = GetNodeByKey(ph, ph->hash_table[index], pk);
 	if (pn == NULL)return FAIL;
 	ph->DestroyFunc(pn->p_elem);
 	free(pn);
+	ph->hash_table[index] = NULL;
 	return SUCCESS;
 }
 
 Result HashPrint(pHash ph)
 {
 	if (ph == NULL)return FAIL;
-	for (int i = 0; i < ph->size_of_arr; i++)
+	int i;
+	for (i = 0; i < ph->size_of_arr; i++)
 	{
 		if (ph->hash_table[i] == NULL)continue;
-		else if(PrintListElements(ph, ph->hash_table[i]) == FAIL)return FAIL;
+		else if(!(PrintListElements(ph, ph->hash_table[i])))return FAIL;
 	}
 	return SUCCESS;
 }
@@ -99,10 +101,12 @@ Result HashPrint(pHash ph)
 Result HashDestroy(pHash ph)
 {
 	if (ph == NULL)return FAIL;
-	for (int i = 0; i < ph->size_of_arr; i++)
+	int i;
+	for (i = 0; i < ph->size_of_arr; i++)
 	{
 		if (ph->hash_table[i] == NULL)continue;
-		else if (DestroyListAndElements(ph, ph->hash_table[i]) == FAIL)return FAIL;
+		else if ((DestroyListAndElements(ph, ph->hash_table[i])) == FAIL)return FAIL;
+		ph->hash_table[i] = NULL;
 	}
 	free(ph->hash_table);
 	return SUCCESS;
@@ -112,8 +116,8 @@ Result HashDestroy(pHash ph)
 pNode CreateNode(pElement p)
 {
 	if (p == NULL)return NULL;
-	pNode pn;
-	if (pn = (pNode)malloc(sizeof(struct _Node)) == NULL)
+	pNode pn = (pNode)malloc(sizeof(struct _Node));
+	if (pn  == NULL)
 	{
 		printf("Error Allocation Memory\n");
 		return NULL;
@@ -188,4 +192,14 @@ Result DestroyListAndElements(pHash ph, pNode head_of_list)
 	return SUCCESS;
 }
 
-bool isKeyExis
+bool isKeyExist(pHash ph, pKey pk)
+{
+	pElement pe;
+	int i;
+	for (i = 0; i < ph->size_of_arr; i++)
+	{
+		pe = GetELementByKey(ph, ph->hash_table[i], pk);
+		if (pe != NULL) return true;
+	}
+	return false;
+}
